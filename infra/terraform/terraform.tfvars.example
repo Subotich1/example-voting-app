@@ -1,0 +1,13 @@
+# Copy to terraform.tfvars to override defaults (terraform.tfvars is git-ignored)
+
+# Capstone 1 (Voting App): defaults are enough
+# node_instance_types = ["t3.medium"]
+# node_desired_size   = 2
+
+# Capstone 2 (Robot Shop + monitoring stack) needs more room:
+# node_instance_types = ["t3.large"]
+# node_desired_size   = 3
+# node_max_size       = 4
+
+# Cheaper, but nodes can be reclaimed by AWS at short notice:
+# node_capacity_type = "SPOT"
