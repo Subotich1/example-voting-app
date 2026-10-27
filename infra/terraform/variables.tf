@@ -54,6 +54,16 @@ variable "github_repo" {
   default     = "Subotich1/example-voting-app"
 }
 
+variable "github_repo_with_ids" {
+  description = <<-EOT
+    The same repo in GitHub's newer OIDC subject format, which pins the owner and repo
+    to their numeric IDs (owner@OWNER_ID/repo@REPO_ID). Find it in CloudTrail under the
+    failed AssumeRoleWithWebIdentity event (userName), or leave empty to skip.
+  EOT
+  type        = string
+  default     = "Subotich1@31375617/example-voting-app@1436209682"
+}
+
 variable "github_branch" {
   description = "Only workflows running on this branch may assume the deploy role"
   type        = string

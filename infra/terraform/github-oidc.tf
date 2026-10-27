@@ -31,11 +31,15 @@ data "aws_iam_policy_document" "github_assume" {
       values   = ["sts.amazonaws.com"]
     }
 
-    # Only this repo, only this branch
+    # Only this repo, only this branch. Both subject formats are accepted:
+    # the classic "owner/repo" one and GitHub's newer ID-pinned one.
     condition {
       test     = "StringEquals"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_repo}:ref:refs/heads/${var.github_branch}"]
+      values = compact([
+        "repo:${var.github_repo}:ref:refs/heads/${var.github_branch}",
+        var.github_repo_with_ids == "" ? "" : "repo:${var.github_repo_with_ids}:ref:refs/heads/${var.github_branch}",
+      ])
     }
   }
 }
