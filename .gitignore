@@ -20,3 +20,4 @@ __pycache__/
 # Misc
 *.pyc
 project.lock.json
+tfplan
