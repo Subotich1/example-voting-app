@@ -1,0 +1,32 @@
+flowchart LR
+  dev([Developer]) -->|git push| gh[GitHub repo]
+
+  subgraph CI["GitHub Actions"]
+    direction TB
+    lint[Lint: Helm + Terraform] --> e2e[E2E test: compose + vote]
+    e2e --> build[Build images]
+    build --> scan[Trivy scan]
+    scan --> push[Push to GHCR, tag = commit SHA]
+    push --> deploy[Helm upgrade]
+  end
+
+  gh --> lint
+  push --> ghcr[(GHCR images)]
+  deploy -->|OIDC, short-lived creds| iam[IAM deploy role]
+
+  subgraph AWS["AWS eu-west-1, default VPC (Terraform)"]
+    iam --> eks
+    subgraph eks["EKS cluster (managed node group)"]
+      direction LR
+      lbv[[ELB]] --> vote[vote x2<br/>Python]
+      vote --> redis[(Redis queue)]
+      redis --> worker[worker<br/>.NET 8]
+      worker --> db[(PostgreSQL<br/>EBS gp3 volume)]
+      db --> result[result<br/>Node.js]
+      result --> lbr[[ELB]]
+    end
+  end
+
+  ghcr -. pull .-> eks
+  user([Voter]) --> lbv
+  user --> lbr
