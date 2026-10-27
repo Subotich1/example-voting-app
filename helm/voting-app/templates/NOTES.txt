@@ -1,0 +1,8 @@
+Voting App deployed (image tag: {{ .Values.image.tag }}).
+
+Get the public URLs (the load balancers take 2-3 minutes to appear):
+  kubectl get svc vote result -n {{ .Release.Namespace }}
+
+Release history and rollback:
+  helm history {{ .Release.Name }} -n {{ .Release.Namespace }}
+  helm rollback {{ .Release.Name }} <REVISION> -n {{ .Release.Namespace }}

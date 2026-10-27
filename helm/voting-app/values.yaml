@@ -1,0 +1,54 @@
+# One values file for the whole app.
+# CI overrides image.tag with the commit SHA on every deploy.
+
+image:
+  registry: ghcr.io/subotich1
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Database credentials are NOT stored here. The chart reads them from a
+# Kubernetes Secret that CI creates from a GitHub secret before deploying.
+database:
+  existingSecret: voting-app-db   # keys: POSTGRES_USER, POSTGRES_PASSWORD
+  name: postgres
+
+vote:
+  replicas: 2
+  optionA: Cats
+  optionB: Dogs
+  service:
+    type: LoadBalancer   # public URL; use ClusterIP + port-forward to avoid the ELB cost
+    port: 80
+  resources:
+    requests: { cpu: 50m, memory: 96Mi }
+    limits: { memory: 256Mi }
+
+result:
+  replicas: 1
+  service:
+    type: LoadBalancer
+    port: 80
+  resources:
+    requests: { cpu: 50m, memory: 96Mi }
+    limits: { memory: 256Mi }
+
+worker:
+  replicas: 1
+  resources:
+    requests: { cpu: 50m, memory: 96Mi }
+    limits: { memory: 256Mi }
+
+redis:
+  image: redis:7.4.12-alpine
+  resources:
+    requests: { cpu: 25m, memory: 32Mi }
+    limits: { memory: 128Mi }
+
+db:
+  image: postgres:16.15-alpine
+  storage:
+    size: 1Gi
+    storageClassName: ""   # empty = cluster default (gp3 from the EBS CSI add-on)
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits: { memory: 512Mi }
