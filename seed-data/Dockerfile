@@ -1,16 +1,14 @@
-FROM python:3.9-slim
+# syntax=docker/dockerfile:1
+FROM python:3.12.16-slim-bookworm
 
-# add apache bench (ab) tool
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    apache2-utils \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends apache2-utils && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /seed
-
 COPY . .
-
-# create POST data files with ab friendly formats
-RUN python make-data.py
-
+RUN python make-data.py && \
+    groupadd --system --gid 10001 app && \
+    useradd --system --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app
+USER 10001
 CMD ["/seed/generate-votes.sh"]

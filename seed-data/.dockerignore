@@ -1,0 +1,24 @@
+# Keep the build context small and keep secrets and VCS data out of images
+.git
+.gitignore
+.github
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+*.md
+**/__pycache__
+**/*.pyc
+.venv
+venv
+node_modules
+npm-debug.log
+bin/
+obj/
+out/
+tests/
+.vscode
+.idea

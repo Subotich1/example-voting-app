@@ -1,32 +1,33 @@
-# base defines a base stage that uses the official python runtime base image
-FROM python:3.11-slim AS base
+# syntax=docker/dockerfile:1
+# Base image pinned to an exact version (Dependabot keeps it current)
+FROM python:3.12.16-slim-bookworm AS base
 
-# Add curl for healthcheck
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl && \
-    rm -rf /var/lib/apt/lists/*
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Set the application directory
 WORKDIR /usr/local/app
 
-# Install our requirements.txt
-COPY requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
 
-# dev defines a stage for development, where it'll watch for filesystem changes
+# Dedicated unprivileged user with a fixed numeric UID (works with runAsNonRoot in k8s)
+RUN groupadd --system --gid 10001 app && \
+    useradd --system --uid 10001 --gid app --no-create-home --shell /usr/sbin/nologin app
+
+# dev: auto-reload for local development
 FROM base AS dev
 RUN pip install watchdog
-ENV FLASK_ENV=development
+ENV FLASK_DEBUG=1
+USER 10001
 CMD ["python", "app.py"]
 
-# final defines the stage that will bundle the application for production
+# final: production image
 FROM base AS final
-
-# Copy our code from the current folder to the working directory inside the container
-COPY . .
-
-# Make port 80 available for links and/or publish
-EXPOSE 80
-
-# Define our command to be run when launching the container
-CMD ["gunicorn", "app:app", "-b", "0.0.0.0:80", "--log-file", "-", "--access-logfile", "-", "--workers", "4", "--keep-alive", "0"]
+COPY --chown=root:root . .
+USER 10001
+EXPOSE 8080
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+  CMD ["python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/', timeout=4)"]
+CMD ["gunicorn", "app:app", "-b", "0.0.0.0:8080", "--log-file", "-", "--access-logfile", "-", "--workers", "4", "--keep-alive", "0"]

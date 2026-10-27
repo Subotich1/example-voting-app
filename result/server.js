@@ -17,9 +17,9 @@ io.on('connection', function (socket) {
   });
 });
 
-var pool = new Pool({
-  connectionString: 'postgres://postgres:postgres@db/postgres'
-});
+// node-postgres reads PGHOST, PGUSER, PGPASSWORD and PGDATABASE from the environment,
+// so no credentials live in source control.
+var pool = new Pool();
 
 async.retry(
   {times: 1000, interval: 1000},

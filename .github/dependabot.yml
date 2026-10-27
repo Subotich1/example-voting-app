@@ -1,7 +1,18 @@
+# Keeps pinned base images and dependencies up to date via pull requests
 version: 2
 updates:
-  # Maintain dependencies for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "monthly"
+  - package-ecosystem: docker
+    directories: ["/vote", "/result", "/worker", "/seed-data"]
+    schedule: { interval: weekly }
+  - package-ecosystem: pip
+    directory: /vote
+    schedule: { interval: weekly }
+  - package-ecosystem: npm
+    directory: /result
+    schedule: { interval: weekly }
+  - package-ecosystem: nuget
+    directory: /worker
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }

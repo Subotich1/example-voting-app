@@ -1,6 +1,22 @@
-*.pyc
-project.lock.json
+# Secrets and local config
+.env
+*.tfvars
+!*.tfvars.example
+*.pem
+kubeconfig*
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl.bak
+
+# Build output
+node_modules/
 bin/
 obj/
-.vs/
-node_modules/
+__pycache__/
+
+# Misc
+*.pyc
+project.lock.json

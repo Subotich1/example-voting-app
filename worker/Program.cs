@@ -16,8 +16,15 @@ namespace Worker
         {
             try
             {
-                var pgsql = OpenDbConnection("Server=db;Username=postgres;Password=postgres;");
-                var redisConn = OpenRedisConnection("redis");
+                // Connection settings come from the environment (no credentials in source)
+                string Env(string key, string fallback) => Environment.GetEnvironmentVariable(key) ?? fallback;
+                var redisHost = Env("REDIS_HOST", "redis");
+                var dbPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")
+                    ?? throw new InvalidOperationException("POSTGRES_PASSWORD is not set");
+                var connString = $"Server={Env("POSTGRES_HOST", "db")};Username={Env("POSTGRES_USER", "postgres")};Password={dbPassword};Database={Env("POSTGRES_DB", "postgres")};";
+
+                var pgsql = OpenDbConnection(connString);
+                var redisConn = OpenRedisConnection(redisHost);
                 var redis = redisConn.GetDatabase();
 
                 // Keep alive is not implemented in Npgsql yet. This workaround was recommended:
@@ -34,7 +41,7 @@ namespace Worker
                     // Reconnect redis if down
                     if (redisConn == null || !redisConn.IsConnected) {
                         Console.WriteLine("Reconnecting Redis");
-                        redisConn = OpenRedisConnection("redis");
+                        redisConn = OpenRedisConnection(redisHost);
                         redis = redisConn.GetDatabase();
                     }
                     string json = redis.ListLeftPopAsync("votes").Result;
@@ -46,7 +53,7 @@ namespace Worker
                         if (!pgsql.State.Equals(System.Data.ConnectionState.Open))
                         {
                             Console.WriteLine("Reconnecting DB");
-                            pgsql = OpenDbConnection("Server=db;Username=postgres;Password=postgres;");
+                            pgsql = OpenDbConnection(connString);
                         }
                         else
                         { // Normal +1 vote requested

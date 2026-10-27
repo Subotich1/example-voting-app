@@ -1,25 +1,24 @@
-FROM node:18-slim
+# syntax=docker/dockerfile:1
+FROM node:24.22.1-bookworm-slim
 
-# add curl for healthcheck
+# tini reaps zombie processes and forwards signals to node
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl tini && \
+    apt-get install -y --no-install-recommends tini && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/local/app
-
-# have nodemon available for local dev use (file watching)
-RUN npm install -g nodemon
+ENV NODE_ENV=production
 
 COPY package*.json ./
+RUN npm ci --omit=dev && npm cache clean --force
 
-RUN npm ci && \
- npm cache clean --force && \
- mv /usr/local/app/node_modules /node_modules
+COPY --chown=root:root . .
 
-COPY . .
-
-ENV PORT=80
-EXPOSE 80
-
+# The official node image ships an unprivileged "node" user (UID 1000)
+USER 1000
+ENV PORT=8080
+EXPOSE 8080
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+  CMD ["node", "-e", "require('http').get('http://127.0.0.1:8080/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
 ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["node", "server.js"]
