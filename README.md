@@ -84,6 +84,8 @@ Because new pods never pass their readiness probe, the old pods keep serving tra
 | Cluster built from code | One push builds, scans and deploys |
 | ![Pods](docs/screenshots/03-pods-running.png) | ![Vote](docs/screenshots/04-vote-page.png) |
 | All pods running, zero restarts | Live vote page on an AWS load balancer |
+| ![Result](docs/screenshots/05-result-page.png) | |
+| Result page counting the votes live | |
 | ![Bad release](docs/screenshots/06-bad-release.png) | ![Rollback](docs/screenshots/07-helm-history.png) |
 | Bad release: old pods still serving | Helm history after rollback |
 | ![Destroy](docs/screenshots/08-terraform-destroy.png) | ![Recreate](docs/screenshots/09-terraform-recreate.png) |
