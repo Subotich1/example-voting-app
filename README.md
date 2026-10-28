@@ -86,6 +86,8 @@ Because new pods never pass their readiness probe, the old pods keep serving tra
 | All pods running, zero restarts | Live vote page on an AWS load balancer |
 | ![Bad release](docs/screenshots/06-bad-release.png) | ![Rollback](docs/screenshots/07-helm-history.png) |
 | Bad release: old pods still serving | Helm history after rollback |
+| ![Destroy](docs/screenshots/08-terraform-destroy.png) | ![Recreate](docs/screenshots/09-terraform-recreate.png) |
+| Environment destroyed with Terraform | Recreated from code with Terraform |
 
 ## No secrets in Git
 - Database password: GitHub secret, written to a Kubernetes Secret at deploy time
