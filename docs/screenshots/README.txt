@@ -1,4 +1,4 @@
-Put screenshots here with these names (blur the AWS account ID first):
+Put screenshots here with these names:
 01-terraform-apply.png
 02-pipeline-green.png
 03-pods-running.png
